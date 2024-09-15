@@ -6,9 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\FENGSHUIKOI.Common\FENGSHUIKOI.Common.csproj" />
-    <ProjectReference Include="..\FENGSHUIKOI.Data\FENGSHUIKOI.Data.csproj" />
-  </ItemGroup>
-
 </Project>
