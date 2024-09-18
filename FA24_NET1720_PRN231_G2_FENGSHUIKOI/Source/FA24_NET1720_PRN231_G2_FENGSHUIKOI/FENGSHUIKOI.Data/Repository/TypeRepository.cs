@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FENGSHUIKOI.Data.Repository
 {
-    public class TypeRepository : GenericRepository<Type>
+    public class TypeRepository : GenericRepository<FENGSHUIKOI.Data.Models.Type>
     {
         public TypeRepository() { }
         public TypeRepository(NET1720_231_2_FENGSHUIKOIContext context)
