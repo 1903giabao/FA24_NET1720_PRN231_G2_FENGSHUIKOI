@@ -126,11 +126,11 @@ namespace FENGSHUIKOI.Service.Services
                 var packageUpdate = await _unitOfWork.PackageRepository.UpdateAsync(package);
                 if (packageUpdate > 0)
                 {
-                    return new BusinessResult(Const.SUCCESS_CREATE, Const.SUCCESS_CREATE_MSG, packageUpdate);
+                    return new BusinessResult(Const.SUCCESS_UDATE, Const.SUCCESS_UDATE_MSG, packageUpdate);
                 }
                 else
                 {
-                    return new BusinessResult(Const.FAIL_CREATE, Const.FAIL_CREATE_MSG);
+                    return new BusinessResult(Const.FAIL_UDATE, Const.FAIL_UDATE_MSG);
                 }
             }
             catch (Exception ex)
@@ -152,13 +152,13 @@ namespace FENGSHUIKOI.Service.Services
                 {
                     package = package.Where(x => x.Id == id.Value).ToList();
                 }
-                if (string.IsNullOrEmpty(name))
+                if (!string.IsNullOrEmpty(name))
                 {
                     package = package.Where(x => x.Name.ToLower().Contains(name.ToLower())).ToList();
                 }if (price.HasValue) 
                 {
                     package = package.Where(x => x.Price == price.Value).ToList();
-                }if(string.IsNullOrEmpty(featureType))
+                }if(!string.IsNullOrEmpty(featureType))
                 {
                     package = package.Where(x => x.FeatureType.ToLower().Contains(featureType.ToLower())).ToList();
                 }if (highlight != null)
