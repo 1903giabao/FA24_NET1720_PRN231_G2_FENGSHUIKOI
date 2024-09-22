@@ -1,0 +1,6 @@
+@FENGSHUIKOI.APIService_HostAddress = http://localhost:5008
+
+GET {{FENGSHUIKOI.APIService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
