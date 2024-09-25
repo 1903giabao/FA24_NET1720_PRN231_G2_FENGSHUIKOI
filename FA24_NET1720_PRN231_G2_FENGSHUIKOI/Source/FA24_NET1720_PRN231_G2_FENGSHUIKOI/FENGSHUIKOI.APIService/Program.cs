@@ -21,6 +21,7 @@ namespace FENGSHUIKOI.APIService
             builder.Services.AddScoped<IProductImageService, ProductImageService>();
             builder.Services.AddScoped<IProductDetailService, ProductDetailService>();
             builder.Services.AddScoped<ISuitableObjectService, SuitableObjectService>();
+            builder.Services.AddScoped<IElementService, ElementService>();
 
             var app = builder.Build();
 
