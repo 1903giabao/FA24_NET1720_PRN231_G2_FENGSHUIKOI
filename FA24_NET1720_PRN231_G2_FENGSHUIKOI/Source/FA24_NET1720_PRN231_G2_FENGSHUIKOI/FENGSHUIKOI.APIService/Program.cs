@@ -1,4 +1,5 @@
 
+using FENGSHUIKOI.Data.Models;
 using FENGSHUIKOI.Service.Base;
 using FENGSHUIKOI.Service.Services;
 
@@ -17,6 +18,10 @@ namespace FENGSHUIKOI.APIService
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
             builder.Services.AddScoped<IPackageService, PackageService>();
+            builder.Services.AddScoped<IProductImageService, ProductImageService>();
+            builder.Services.AddScoped<IProductDetailService, ProductDetailService>();
+
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

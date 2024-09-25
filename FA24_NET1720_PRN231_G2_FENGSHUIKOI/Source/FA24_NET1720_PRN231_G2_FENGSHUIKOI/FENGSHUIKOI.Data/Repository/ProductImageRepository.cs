@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FENGSHUIKOI.Data.Repository
 {
-    public class ProductImageRepository : GenericRepository<ProductImageRepository>
+    public class ProductImageRepository : GenericRepository<ProductImage>
     {
         public ProductImageRepository() { }
         public ProductImageRepository(NET1720_231_2_FENGSHUIKOIContext context)
