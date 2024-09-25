@@ -1,4 +1,5 @@
 ﻿using FENGSHUIKOI.Common;
+using FENGSHUIKOI.Data.Dto;
 using FENGSHUIKOI.Data.Models;
 using FENGSHUIKOI.Data.UnitOfWork;
 using FENGSHUIKOI.Service.Base;
@@ -14,9 +15,9 @@ namespace FENGSHUIKOI.Service.Services
     {
         Task<IBusinessResult> GetAll();
         Task<IBusinessResult> GetById(int id);
-        Task<IBusinessResult> Update(SuitableObject obn);
+        Task<IBusinessResult> Update(int id, SuitableObjectDTO obn);
         Task<IBusinessResult> DeleteById(int id);
-        Task<IBusinessResult> Save(SuitableObject obj);
+        Task<IBusinessResult> Save( SuitableObjectDTO obj);
     }
     public class SuitableObjectService : ISuitableObjectService
     {
@@ -111,11 +112,27 @@ namespace FENGSHUIKOI.Service.Services
         }
 
 
-        public async Task<IBusinessResult> Save(SuitableObject obj)
+        public async Task<IBusinessResult> Save(SuitableObjectDTO suitableObjectDto)
         {
             try
             {
-                int result = await _unitOfWork.SuitableObjectRepository.CreateAsync(obj);
+                var newSuitableObject = new SuitableObject
+                {
+                    ElementId = suitableObjectDto.ElementId,
+                    TypeId = suitableObjectDto.TypeId,
+                    Color = suitableObjectDto.Color,
+                    Size = suitableObjectDto.Size,
+                    Direction = suitableObjectDto.Direction,
+                    Position = suitableObjectDto.Position,
+                    Shape = suitableObjectDto.Shape,
+                    Volume = suitableObjectDto.Volume,
+                    WaterQuality = suitableObjectDto.WaterQuality,
+                    WaterTemperature = suitableObjectDto.WaterTemperature,
+                    InformationDirection = suitableObjectDto.InformationDirection,
+                    Flag = suitableObjectDto.Flag
+                };
+
+                int result = await _unitOfWork.SuitableObjectRepository.CreateAsync(newSuitableObject);
                 if (result > 0)
                 {
                     return new BusinessResult(Const.SUCCESS_CREATE, Const.SUCCESS_CREATE_MSG);
@@ -131,12 +148,31 @@ namespace FENGSHUIKOI.Service.Services
             }
         }
 
-        public async Task<IBusinessResult> Update(SuitableObject obj)
+
+        public async Task<IBusinessResult> Update(int id, SuitableObjectDTO suitableObjectDto)
         {
             try
             {
+                // Fetch the existing SuitableObject by id
+                var existedSuitableObject = await _unitOfWork.SuitableObjectRepository.GetByIdAsync(id);
 
-                int result = await _unitOfWork.SuitableObjectRepository.UpdateAsync(obj);
+
+                // Update the properties
+                existedSuitableObject.ElementId = suitableObjectDto.ElementId;
+                existedSuitableObject.TypeId = suitableObjectDto.TypeId;
+                existedSuitableObject.Color = suitableObjectDto.Color;
+                existedSuitableObject.Size = suitableObjectDto.Size;
+                existedSuitableObject.Direction = suitableObjectDto.Direction;
+                existedSuitableObject.Position = suitableObjectDto.Position;
+                existedSuitableObject.Shape = suitableObjectDto.Shape;
+                existedSuitableObject.Volume = suitableObjectDto.Volume;
+                existedSuitableObject.WaterQuality = suitableObjectDto.WaterQuality;
+                existedSuitableObject.WaterTemperature = suitableObjectDto.WaterTemperature;
+                existedSuitableObject.InformationDirection = suitableObjectDto.InformationDirection;
+                existedSuitableObject.Flag = suitableObjectDto.Flag;
+
+                // Update the record in the repository
+                int result = await _unitOfWork.SuitableObjectRepository.UpdateAsync(existedSuitableObject);
                 if (result > 0)
                 {
                     return new BusinessResult(Const.FAIL_UDATE, Const.SUCCESS_UDATE_MSG);
@@ -151,5 +187,6 @@ namespace FENGSHUIKOI.Service.Services
                 return new BusinessResult(-4, ex.Message);
             }
         }
+
     }
 }
