@@ -20,7 +20,7 @@ namespace FENGSHUIKOI.APIService
             builder.Services.AddScoped<IPackageService, PackageService>();
             builder.Services.AddScoped<IProductImageService, ProductImageService>();
             builder.Services.AddScoped<IProductDetailService, ProductDetailService>();
-
+            builder.Services.AddScoped<ISuitableObjectService, SuitableObjectService>();
 
             var app = builder.Build();
 
