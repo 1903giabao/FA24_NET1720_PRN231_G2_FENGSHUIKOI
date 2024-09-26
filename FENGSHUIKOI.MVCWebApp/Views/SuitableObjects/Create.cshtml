@@ -1,0 +1,86 @@
+﻿@model FENGSHUIKOI.Data.Models.SuitableObject
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>SuitableObject</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="ElementId" class="control-label"></label>
+                <select asp-for="ElementId" class ="form-control" asp-items="ViewBag.ElementId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="TypeId" class="control-label"></label>
+                <select asp-for="TypeId" class ="form-control" asp-items="ViewBag.TypeId"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Color" class="control-label"></label>
+                <input asp-for="Color" class="form-control" />
+                <span asp-validation-for="Color" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Size" class="control-label"></label>
+                <input asp-for="Size" class="form-control" />
+                <span asp-validation-for="Size" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Direction" class="control-label"></label>
+                <input asp-for="Direction" class="form-control" />
+                <span asp-validation-for="Direction" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Position" class="control-label"></label>
+                <input asp-for="Position" class="form-control" />
+                <span asp-validation-for="Position" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Shape" class="control-label"></label>
+                <input asp-for="Shape" class="form-control" />
+                <span asp-validation-for="Shape" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Volume" class="control-label"></label>
+                <input asp-for="Volume" class="form-control" />
+                <span asp-validation-for="Volume" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="WaterQuality" class="control-label"></label>
+                <input asp-for="WaterQuality" class="form-control" />
+                <span asp-validation-for="WaterQuality" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="WaterTemperature" class="control-label"></label>
+                <input asp-for="WaterTemperature" class="form-control" />
+                <span asp-validation-for="WaterTemperature" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="InformationDirection" class="control-label"></label>
+                <input asp-for="InformationDirection" class="form-control" />
+                <span asp-validation-for="InformationDirection" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Flag" class="control-label"></label>
+                <input asp-for="Flag" class="form-control" />
+                <span asp-validation-for="Flag" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
