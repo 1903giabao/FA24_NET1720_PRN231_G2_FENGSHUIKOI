@@ -8,6 +8,8 @@ namespace FENGSHUIKOI.Common
 {
     public class Const
     {
+        public static string APIEndPoint = "https://localhost:7194/api/";
+
         #region
         // Error
         public static int ERROR_EXEPTION = -1;

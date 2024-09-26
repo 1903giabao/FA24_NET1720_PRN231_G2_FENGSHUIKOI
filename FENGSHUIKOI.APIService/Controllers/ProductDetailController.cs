@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FENGSHUIKOI.APIService.Controllers
 {
     [ApiController]
-    [Route("ProductDetail")]
+    [Route("api/[controller]")]
     public class ProductDetailController : ControllerBase
     {
         private readonly IProductDetailService _productDetailService;
