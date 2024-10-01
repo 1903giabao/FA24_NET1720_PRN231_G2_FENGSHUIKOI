@@ -10,6 +10,8 @@ using FENGSHUIKOI.Common;
 using Newtonsoft.Json;
 using FENGSHUIKOI.Service.Base;
 using System.Reflection.Metadata.Ecma335;
+using Azure;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FENGSHUIKOI.MVCWebApp.Controllers
 {
@@ -25,20 +27,20 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
         // GET: ProductDetails
         public async Task<IActionResult> Index()
         {
-            using (var httpClient = new  HttpClient())
+            using (var httpClient = new HttpClient())
             {
                 try
                 {
-                    using (var response = await httpClient.GetAsync(Const.APIEndPoint + "ProductDetail")) 
+                    using (var response = await httpClient.GetAsync(Const.APIEndPoint + "ProductDetail"))
                     {
                         if (response.IsSuccessStatusCode)
                         {
                             var content = await response.Content.ReadAsStringAsync();
-                            var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                            // Directly deserialize into a List<ProductDetail>
+                            var data = JsonConvert.DeserializeObject<List<ProductDetail>>(content);
 
-                            if (result != null && result.Data != null)
+                            if (data != null)
                             {
-                                var data = JsonConvert.DeserializeObject<List<ProductDetail>>(result.Data.ToString());
                                 return View(data);
                             }
                         }
@@ -46,151 +48,217 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
                 }
                 catch (HttpRequestException ex)
                 {
-                    // Log the exception (consider using a logging framework)
                     Console.WriteLine($"Request error: {ex.Message}");
                 }
                 catch (Exception ex)
                 {
-                    // Catch any other exceptions
                     Console.WriteLine($"Unexpected error: {ex.Message}");
                 }
             }
             return View(new List<ProductDetail>());
         }
 
-        // GET: ProductDetails/Details/5
-/*        public async Task<IActionResult> Details(int? id)
+
+        public async Task<IActionResult> Create()
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var productDetail = await _context.ProductDetails
-                .Include(p => p.TypeNavigation)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (productDetail == null)
-            {
-                return NotFound();
-            }
-
-            return View(productDetail);
-        }
-
-        // GET: ProductDetails/Create
-        public IActionResult Create()
-        {
-            ViewData["TypeId"] = new SelectList(_context.Types, "Id", "Name");
+            ViewData["TypeId"] = new SelectList(await this.GetType(), "Id", "Name");
             return View();
         }
 
-        // POST: ProductDetails/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Description,ComboId,TypeId,Color,Name,Quantity,Type,Status,CreateDate,Size,Origin")] ProductDetail productDetail)
+        // public async Task<IActionResult> Create([Bind("Id,Description,ComboId,TypeId,Color,Name,Quantity,Type,Status,CreateDate,Size,Origin")] ProductDetail productDetail)
+        public async Task<IActionResult> Create(ProductDetail productDetail)
         {
+            bool saveStatus = false;
             if (ModelState.IsValid)
             {
-                _context.Add(productDetail);
-                await _context.SaveChangesAsync();
+                using (var httpCilent = new HttpClient())
+                {
+                    using (var response = await httpCilent.PostAsJsonAsync(Const.APIEndPoint + "ProductDetail/", productDetail))
+                    {
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var content = await response.Content.ReadAsStringAsync();
+                            var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                            if (result != null)
+                            {
+                                saveStatus = true;
+                            }
+                            else
+                            {
+                                saveStatus = false;
+                            }
+                        }
+                    }
+                }
+            }
+            if (saveStatus)
+            {
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["TypeId"] = new SelectList(_context.Types, "Id", "Name", productDetail.TypeId);
-            return View(productDetail);
+            else
+            {
+                ViewData["TypeId"] = new SelectList(await this.GetType(), "Id", "Name", productDetail.Id);
+                return View(productDetail);
+            }
         }
-
-        // GET: ProductDetails/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var productDetail = await _context.ProductDetails.FindAsync(id);
-            if (productDetail == null)
-            {
-                return NotFound();
-            }
-            ViewData["TypeId"] = new SelectList(_context.Types, "Id", "Name", productDetail.TypeId);
-            return View(productDetail);
-        }
-
-        // POST: ProductDetails/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Description,ComboId,TypeId,Color,Name,Quantity,Type,Status,CreateDate,Size,Origin")] ProductDetail productDetail)
-        {
-            if (id != productDetail.Id)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid)
-            {
-                try
+        /*
+                public async Task<IActionResult> Edit(int? id)
                 {
-                    _context.Update(productDetail);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProductDetailExists(productDetail.Id))
+                    if (id == null)
                     {
                         return NotFound();
                     }
-                    else
+
+                    var productDetail = await _context.ProductDetails.FindAsync(id);
+                    if (productDetail == null)
                     {
-                        throw;
+                        return NotFound();
+                    }
+                    ViewData["TypeId"] = new SelectList(_context.Types, "Id", "Name", productDetail.TypeId);
+                    return View(productDetail);
+                }*/
+
+
+        /* [HttpPost]
+         [ValidateAntiForgeryToken]
+         public async Task<IActionResult> Edit(int id, [Bind("Id,Description,ComboId,TypeId,Color,Name,Quantity,Type,Status,CreateDate,Size,Origin")] ProductDetail productDetail)
+         {
+             if (id != productDetail.Id)
+             {
+                 return NotFound();
+             }
+
+             if (ModelState.IsValid)
+             {
+                 try
+                 {
+                     _context.Update(productDetail);
+                     await _context.SaveChangesAsync();
+                 }
+                 catch (DbUpdateConcurrencyException)
+                 {
+                     if (!ProductDetailExists(productDetail.Id))
+                     {
+                         return NotFound();
+                     }
+                     else
+                     {
+                         throw;
+                     }
+                 }
+                 return RedirectToAction(nameof(Index));
+             }
+             ViewData["TypeId"] = new SelectList(_context.Types, "Id", "Name", productDetail.TypeId);
+             return View(productDetail);
+         }
+
+ */
+        public async Task<IActionResult> Delete(int id)
+        {
+            using (var httpClient = new HttpClient())
+            {
+                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "ProductDetail/" + id))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                        if (result != null && result.Data != null)
+                        {
+                            var data = JsonConvert.DeserializeObject<ProductDetail>(result.Data.ToString());
+                            return View(data);
+                        }
                     }
                 }
-                return RedirectToAction(nameof(Index));
+
             }
-            ViewData["TypeId"] = new SelectList(_context.Types, "Id", "Name", productDetail.TypeId);
-            return View(productDetail);
+            return View(new ProblemDetails());
         }
-
-        // GET: ProductDetails/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var productDetail = await _context.ProductDetails
-                .Include(p => p.TypeNavigation)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (productDetail == null)
-            {
-                return NotFound();
-            }
-
-            return View(productDetail);
-        }
-
-        // POST: ProductDetails/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var productDetail = await _context.ProductDetails.FindAsync(id);
-            if (productDetail != null)
+            bool deleteStatus = false;
+
+            if (ModelState.IsValid)
             {
-                _context.ProductDetails.Remove(productDetail);
+                using (var httpClient = new HttpClient())
+                {
+                    using (var response = await httpClient.DeleteAsync(Const.APIEndPoint + "Combo"))
+                    {
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var content = await response.Content.ReadAsStringAsync();
+                            var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+
+                            if (result != null && result.Status == Const.SUCCESS_DELETE)
+                            {
+                                deleteStatus = true;
+                            }
+                            else
+                            {
+                                deleteStatus = false;
+                            }
+                        }
+                    }
+                }
             }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            if (deleteStatus)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                return RedirectToAction(nameof(Index));
+            }
         }
 
-        private bool ProductDetailExists(int id)
+
+        /*  [HttpPost, ActionName("Delete")]
+          [ValidateAntiForgeryToken]
+          public async Task<IActionResult> DeleteConfirmed(string id)
+          {
+              var productDetail = await _context.ProductDetails.FindAsync(id);
+              if (productDetail != null)
+              {
+                  _context.ProductDetails.Remove(productDetail);
+              }
+
+              await _context.SaveChangesAsync();
+              return RedirectToAction(nameof(Index));
+          }
+
+          private bool ProductDetailExists(int id)
+          {
+              return _context.ProductDetails.Any(e => e.Id == id);
+          }*/
+
+        public async Task<List<FENGSHUIKOI.Data.Models.Type>> GetType()
         {
-            return _context.ProductDetails.Any(e => e.Id == id);
-        }*/
+            var type = new List<FENGSHUIKOI.Data.Models.Type>();
+            using (var httpClient = new HttpClient()) {
+                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "type"))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        var rs = JsonConvert.DeserializeObject<BusinessResult>(content);
+
+                        if (rs != null && rs.Data != null)
+                        {
+                            type = JsonConvert.DeserializeObject<List<FENGSHUIKOI.Data.Models.Type>>(rs.Data.ToString());
+                        }
+                       
+                    }
+                }
+            }
+            return type;
+
+        }
     }
 }
