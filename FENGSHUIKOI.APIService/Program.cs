@@ -23,6 +23,7 @@ namespace FENGSHUIKOI.APIService
             builder.Services.AddScoped<ISuitableObjectService, SuitableObjectService>();
             builder.Services.AddScoped<IMemberService, MemberService>();
             builder.Services.AddScoped<IComboService, ComboService>();
+            builder.Services.AddScoped<ITypeService, TypeService>();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
