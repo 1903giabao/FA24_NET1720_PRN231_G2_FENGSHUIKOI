@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace FENGSHUIKOI.APIService.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/suitableObject")]
     public class SuitableObjectController : ControllerBase
     {
         private readonly ISuitableObjectService _suitableObjectService;
