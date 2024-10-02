@@ -1,0 +1,79 @@
+﻿@model FENGSHUIKOI.Data.Models.Combo
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Combo</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="MemberId" class="control-label"></label>
+                <select asp-for="MemberId" class="form-control" asp-items="ViewBag.MemberId"></select>
+                <span asp-validation-for="MemberId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ElementId" class="control-label"></label>
+                <select asp-for="ElementId" class="form-control" asp-items="ViewBag.ElementId"></select>
+                <span asp-validation-for="ElementId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProductDetailId" class="control-label"></label>
+                <select asp-for="ProductDetailId" class="form-control" asp-items="ViewBag.ProductDetailId"></select>
+                <span asp-validation-for="ProductDetailId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ComboName" class="control-label"></label>
+                <input asp-for="ComboName" class="form-control" />
+                <span asp-validation-for="ComboName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ComboPrice" class="control-label"></label>
+                <input asp-for="ComboPrice" class="form-control" />
+                <span asp-validation-for="ComboPrice" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Discount" class="control-label"></label>
+                <input asp-for="Discount" class="form-control" />
+                <span asp-validation-for="Discount" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Status" class="control-label"></label>
+                <input asp-for="Status" class="form-control" />
+                <span asp-validation-for="Status" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CreatedBy" class="control-label"></label>
+                <input asp-for="CreatedBy" class="form-control" />
+                <span asp-validation-for="CreatedBy" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CreatedAt" class="control-label"></label>
+                <input asp-for="CreatedAt" class="form-control" />
+                <span asp-validation-for="CreatedAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="UpdatedAt" class="control-label"></label>
+                <input asp-for="UpdatedAt" class="form-control" />
+                <span asp-validation-for="UpdatedAt" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
