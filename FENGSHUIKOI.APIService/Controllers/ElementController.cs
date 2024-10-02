@@ -11,7 +11,7 @@ namespace FENGSHUIKOI.APIService.Controllers
     [Route("elements")]
     public class ElementController : ControllerBase
     {
-        private readonly IElementService _productService;
+        private  IElementService _productService;
 
         public ElementController(IElementService productService)
         {
@@ -23,9 +23,9 @@ namespace FENGSHUIKOI.APIService.Controllers
             var result = await _productService.GetAll();
             if (result.Status == Const.SUCCESS_READ)
             {
-                return Ok(result.Data);
+                return Ok(result);
             }
-            return NotFound(result.Message);
+            return NotFound(result);
         }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)

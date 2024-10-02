@@ -1,5 +1,6 @@
 using FENGSHUIKOI.Data.Models;
 
+
 namespace FENGSHUIKOI.MVCWebApp
 {
     public class Program
@@ -8,7 +9,7 @@ namespace FENGSHUIKOI.MVCWebApp
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
+      
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<NET1720_231_2_FENGSHUIKOIContext>();
 

@@ -15,8 +15,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\FENGSHUIKOI.APIService\FENGSHUIKOI.APIService.csproj" />
 		<ProjectReference Include="..\FENGSHUIKOI.Common\FENGSHUIKOI.Common.csproj" />
+		<ProjectReference Include="..\FENGSHUIKOI.Data\FENGSHUIKOI.Data.csproj" />
+		<ProjectReference Include="..\FENGSHUIKOI.Service\FENGSHUIKOI.Service.csproj" />
 	</ItemGroup>
 
 </Project>
