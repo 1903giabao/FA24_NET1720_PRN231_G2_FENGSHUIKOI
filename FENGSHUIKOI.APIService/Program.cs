@@ -54,6 +54,9 @@ namespace FENGSHUIKOI.APIService
 
             app.UseAuthorization();
 
+            app.UseCors("AllowAnyOrigin");
+
+
 
             app.MapControllers();
 

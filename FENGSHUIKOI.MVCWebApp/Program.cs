@@ -17,6 +17,19 @@ namespace FENGSHUIKOI.MVCWebApp
             builder.Services.AddScoped<TypeService>();
             builder.Services.AddScoped<SuitableObjectService>();
 
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAnyOrigin",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                               .AllowAnyHeader()
+                               .AllowAnyMethod();
+                    });
+            });
+
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -31,6 +44,7 @@ namespace FENGSHUIKOI.MVCWebApp
             app.UseStaticFiles();
 
             app.UseRouting();
+            app.UseCors("AllowAnyOrigin");
 
             app.UseAuthorization();
 
