@@ -16,11 +16,8 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
 {
     public class SuitableObjectsController : Controller
     {
-        private readonly NET1720_231_2_FENGSHUIKOIContext _context;
-
-        public SuitableObjectsController(NET1720_231_2_FENGSHUIKOIContext context)
+        public SuitableObjectsController()
         {
-            _context = context;
         }
 
         // GET: SuitableObjects
@@ -84,7 +81,7 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
         // GET: SuitableObjects/Create
         public async Task<IActionResult> Create()
         {
-            //ViewData["ElementId"] = new SelectList(await this., "Id", "Name");
+            ViewData["ElementId"] = new SelectList(await this.GetElements(), "Id", "Name");
             ViewData["TypeId"] = new SelectList(await this.GetTypes(), "Id", "Name");
             return View();
         }
@@ -109,7 +106,7 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
                             var context = await response.Content.ReadAsStringAsync();
                             var result = JsonConvert.DeserializeObject<BusinessResult>(context);
 
-                            if (result != null && result.Data != null)
+                            if (result != null && result.Message == Const.SUCCESS_CREATE_MSG)
                             {
                                 saveStatus = true;
                             }
@@ -128,9 +125,56 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
             }
             else
             {
-                //ViewData["Id"] = new SelectList(await this.GetType(), "Id", "Name", suitableObject.ElementId);
+                ViewData["ElementId"] = new SelectList(await this.GetElements(), "Id", "Name");
+                ViewData["TypeId"] = new SelectList(await this.GetTypes(), "Id", "Name");
                 return View(suitableObject);
             }
+        }
+
+        // GET: SuitableObjects/Edit
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            using (var httpClient = new HttpClient())
+            {
+                try
+                {
+                    using (var response = await httpClient.GetAsync(Const.APIEndPoint + "suitableObject/" + id))
+                    {
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var content = await response.Content.ReadAsStringAsync();
+                            var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+
+
+                            if (result == null || result.Status == 404)
+                            {
+                                return NotFound();
+                            }
+                            if (result != null)
+                            {
+                                var data = JsonConvert.DeserializeObject<Element>(result.Data.ToString());
+                                return View(data);
+                            }
+                        }
+                    }
+                }
+                catch (HttpRequestException ex)
+                {
+                    Console.WriteLine($"Request error: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Unexpected error: {ex.Message}");
+                }
+            }
+
+
+            return View(new Element());
         }
 
         // POST: SuitableObjects/Edit/5
@@ -140,34 +184,42 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,ElementId,TypeId,Color,Size,Direction,Position,Shape,Volume,WaterQuality,WaterTemperature,InformationDirection,Flag")] SuitableObject suitableObject)
         {
-            if (id != suitableObject.Id)
-            {
-                return NotFound();
-            }
-
+            bool updateStatus = false;
+            
             if (ModelState.IsValid)
             {
-                try
+                using (var httpClient = new HttpClient())
                 {
-                    _context.Update(suitableObject);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!SuitableObjectExists(suitableObject.Id))
+                    using (var response = await httpClient.PutAsJsonAsync(Const.APIEndPoint + "suitableObject/", suitableObject))
                     {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var context = await response.Content.ReadAsStringAsync();
+                            var result = JsonConvert.DeserializeObject<BusinessResult>(context);
+
+                            if (result != null && result.Message == Const.SUCCESS_UDATE_MSG)
+                            {
+                                updateStatus = true;
+                            }
+                            else
+                            {
+                                updateStatus = false;
+                            }
+                        }
                     }
                 }
+            }
+
+            if (updateStatus)
+            {
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ElementId"] = new SelectList(_context.Elements, "Id", "Name", suitableObject.ElementId);
-            ViewData["TypeId"] = new SelectList(_context.Types, "Id", "Name", suitableObject.TypeId);
-            return View(suitableObject);
+            else
+            {
+                ViewData["ElementId"] = new SelectList(await this.GetElements(), "Id", "Name");
+                ViewData["TypeId"] = new SelectList(await this.GetTypes(), "Id", "Name");
+                return View(suitableObject);
+            }
         }
 
         // GET: SuitableObjects/Delete/5
@@ -210,7 +262,7 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
                         {
                             var context = await response.Content.ReadAsStringAsync();
                             var result = JsonConvert.DeserializeObject<BusinessResult>(context);
-                            if (result != null && result.Data != null)
+                            if (result != null && result.Message == Const.SUCCESS_DELETE_MSG)
                             {
                                 deleteStatus = true;
                             }
@@ -233,10 +285,10 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
             }
         }
 
-        private bool SuitableObjectExists(int id)
+/*        private bool SuitableObjectExists(int id)
         {
             return _context.SuitableObjects.Any(e => e.Id == id);
-        }
+        }*/
 
         public async Task<List<FENGSHUIKOI.Data.Models.Type>> GetTypes()
         {
@@ -259,7 +311,6 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
                 }
             }
             return types;
-
         }        
         
         public async Task<List<FENGSHUIKOI.Data.Models.Element>> GetElements()
@@ -267,7 +318,7 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
             var elements = new List<FENGSHUIKOI.Data.Models.Element>();
             using (var httpClient = new HttpClient())
             {
-                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "element"))
+                using (var response = await httpClient.GetAsync("https://localhost:7194/" + "elements"))
                 {
                     if (response.IsSuccessStatusCode)
                     {
