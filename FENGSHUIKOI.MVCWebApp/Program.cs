@@ -1,4 +1,5 @@
 using FENGSHUIKOI.Data.Models;
+using FENGSHUIKOI.Service.Services;
 
 
 namespace FENGSHUIKOI.MVCWebApp
@@ -12,6 +13,9 @@ namespace FENGSHUIKOI.MVCWebApp
       
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<NET1720_231_2_FENGSHUIKOIContext>();
+            builder.Services.AddScoped<ElementService>();
+            builder.Services.AddScoped<TypeService>();
+            builder.Services.AddScoped<SuitableObjectService>();
 
 
             builder.Services.AddCors(options =>

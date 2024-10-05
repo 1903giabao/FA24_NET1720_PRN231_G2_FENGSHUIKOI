@@ -15,16 +15,14 @@ namespace FENGSHUIKOI.APIService
 
             builder.Services.AddControllers();
 
-
-
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowAnyOrigin",
+                options.AddPolicy("AllowAll",
                     builder =>
                     {
                         builder.AllowAnyOrigin()
-                               .AllowAnyHeader()
-                               .AllowAnyMethod();
+                               .AllowAnyMethod()
+                               .AllowAnyHeader();
                     });
             });
 
@@ -49,6 +47,8 @@ namespace FENGSHUIKOI.APIService
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+
+            app.UseCors("AllowAll");
 
             app.UseHttpsRedirection();
 

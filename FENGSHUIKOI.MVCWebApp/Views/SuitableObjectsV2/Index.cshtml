@@ -1,0 +1,174 @@
+﻿@model IEnumerable<FENGSHUIKOI.Data.Models.SuitableObject>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="row">
+    <div class="col-md-10">
+        <h3 class="display-8">Suitalbe Object List</h3>
+    </div>
+    <div class="col-md-2 text-end">
+        <button type="button" class="btn btn-primary" onclick="add();">
+            Add
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr class="card-header">
+                    <th class="card-title text-center">Color</th>
+                    <th class="card-title text-center">Size</th>
+                    <th class="card-title text-center">Direction</th>
+                    <th class="card-title text-center">Position</th>
+                    <th class="card-title text-center">Shape</th>
+                    <th class="card-title text-center">Volume</th>
+                    <th class="card-title text-center">WaterQuality</th>
+                    <th class="card-title text-center">WaterTemperature</th>
+                    <th class="card-title text-center">InformationDirection</th>
+                    <th class="card-title text-center">Flag</th>
+                    <th class="card-title text-center">Element</th>
+                    <th class="card-title text-center">Type</th>
+                </tr>
+            </thead>
+            <tbody class="tblSuitableObject">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="suitableObjectModal" tabindex="-1" aria-labelledby="suitableObjectModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            @using (Html.BeginForm("Create", "SuitableObjectsV2", FormMethod.Post, new { name = "frm", id = "frm" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="suitableObjectModalLabel">Suitable Object</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="suitableObjectModalContent">
+                    <div class="mb-3">
+                        <label for="Element" class="form-label">Element</label>
+                        <select class="form-select" id="ElementId" name="ElementId" required>
+                            <option value="" disabled selected>Select an Element</option>
+                            @foreach (var element in ViewBag.Elements as SelectList)
+                            {
+                                <option value="@element.Value">@element.Text</option>
+                            }
+                            
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Type" class="form-label">Type</label>
+
+                        <select class="form-select" id="TypeId" name="TypeId" required>
+                            <option value="" disabled selected>Select a Type</option>
+                            @foreach (var type in ViewBag.Types as SelectList)
+                            {
+                                <option value="@type.Value">@type.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label for="Color" class="form-label">Color</label>
+                        <input type="text" class="form-control" id="Color" name="Color" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Size" class="form-label">Size</label>
+                        <input type="text" class="form-control" id="Size" name="Size" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Direction" class="form-label">Direction</label>
+                        <input type="text" class="form-control" id="Direction" name="Direction" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Position" class="form-label">Position</label>
+                        <input type="text" class="form-control" id="Position" name="Position" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Shape" class="form-label">Shape</label>
+                        <input type="text" class="form-control" id="Shape" name="Shape" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Volume" class="form-label">Volume</label>
+                        <input type="text" class="form-control" id="Volume" name="Volume" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="WaterQuality" class="form-label">Water Quality</label>
+                        <input type="text" class="form-control" id="WaterQuality" name="WaterQuality" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="WaterTemperature" class="form-label">Water Temperature</label>
+                        <input type="text" class="form-control" id="WaterTemperature" name="WaterTemperature" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="InformationDirection" class="form-label">Information Direction</label>
+                        <input type="text" class="form-control" id="InformationDirection" name="InformationDirection" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Flag" class="form-label">Flag</label>
+                        <input type="text" class="form-control" id="Flag" name="Flag" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btSave" type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function() {
+            loadData();
+        });
+
+        function loadData(){
+            alert("Load data progressing [APIService must add CORS and set AllowAny*]");
+            $.ajax({
+                url: 'https://localhost:7194/api/SuitableObject',
+                type: "GET",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    alert('Server response: ' + result.message);
+                    console.log(result);
+                    var html = '';
+                    $.each(result.data, function (key, item) {
+                        html += '<tr>';
+                        html += '<td>' + item.color + '</td>';
+                        html += '<td>' + item.size + '</td>';
+                        html += '<td>' + item.direction + '</td>';
+                        html += '<td>' + item.position + '</td>';
+                        html += '<td>' + item.shape + '</td>';
+                        html += '<td>' + item.volume + '</td>';
+                        html += '<td>' + item.waterQuality + '</td>';
+                        html += '<td>' + item.waterTemperature + '</td>';
+                        html += '<td>' + item.informationDirection + '</td>';
+                        html += '<td>' + item.flag + '</td>';
+                        html += '<td>' + item.elementId + '</td>';
+                        html += '<td>' + item.typeId + '</td>';
+                        html += '<td></td>';
+                        html += '</tr>';
+                    });
+                    $('.tblSuitableObject').html(html);
+                },
+                error: function (xhr, error) {
+                    alert(xhr.statusText);
+                }
+            });
+}
+
+        function add() {
+            $("#suitableObjectModalLabel").html("Add New");
+            $('#suitableObjectModal').modal('show');
+        }
+    </script>
+
+}
