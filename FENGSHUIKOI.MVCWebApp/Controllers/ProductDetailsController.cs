@@ -60,6 +60,28 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
         }
 
 
+        public async Task<IActionResult> Details(int? id)
+        {
+            using (var httpClient = new HttpClient())
+            {
+                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "ProductDetail/" + id))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                        if (result != null && result.Data != null)
+                        {
+                            var data = JsonConvert.DeserializeObject<ProductDetail>(result.Data.ToString());
+                            return View(data);
+                        }
+                    }
+                }
+
+            }
+            return View(new ProblemDetails());
+        }
+
         public async Task<IActionResult> Create()
         {
             ViewData["TypeId"] = new SelectList(await this.GetType(), "Id", "Name");
@@ -105,58 +127,70 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
                 return View(productDetail);
             }
         }
-        /*
-                public async Task<IActionResult> Edit(int? id)
+
+        public async Task<IActionResult> Edit(int? id)
+        {
+           var productDetail = new ProductDetail();
+            using (var httpCilent = new HttpClient())
+            {
+                using (var response = await httpCilent.GetAsync(Const.APIEndPoint + "ProductDetail/" +id))
                 {
-                    if (id == null)
+                    if (response.IsSuccessStatusCode)
                     {
-                        return NotFound();
+                        var content = await response.Content.ReadAsStringAsync();
+                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                        if (result != null && result.Data !=null)
+                        {
+                            productDetail = JsonConvert.DeserializeObject<ProductDetail>(result.Data.ToString());
+                        }
                     }
+                }
+            }
 
-                    var productDetail = await _context.ProductDetails.FindAsync(id);
-                    if (productDetail == null)
+            ViewData["TypeId"] = new SelectList(await this.GetType(), "Id", "Name", productDetail.Id);
+            return View(productDetail);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Description,ComboId,TypeId,Color,Name,Quantity,Type,Status,CreateDate,Size,Origin")] ProductDetail productDetail)
+        {
+            bool saveStatus = false;
+            if (ModelState.IsValid)
+            {
+                using (var httpCilent = new HttpClient())
+                {
+                    using (var response = await httpCilent.PostAsJsonAsync(Const.APIEndPoint + "ProductDetail/", productDetail))
                     {
-                        return NotFound();
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var content = await response.Content.ReadAsStringAsync();
+                            var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                            if (result != null)
+                            {
+                                saveStatus = true;
+                            }
+                            else
+                            {
+                                saveStatus = false;
+                            }
+                        }
                     }
-                    ViewData["TypeId"] = new SelectList(_context.Types, "Id", "Name", productDetail.TypeId);
-                    return View(productDetail);
-                }*/
+                }
+            }
+            if (saveStatus)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                ViewData["TypeId"] = new SelectList(await this.GetType(), "Id", "Name", productDetail.Id);
+                return View(productDetail);
+            }
+        }
 
 
-        /* [HttpPost]
-         [ValidateAntiForgeryToken]
-         public async Task<IActionResult> Edit(int id, [Bind("Id,Description,ComboId,TypeId,Color,Name,Quantity,Type,Status,CreateDate,Size,Origin")] ProductDetail productDetail)
-         {
-             if (id != productDetail.Id)
-             {
-                 return NotFound();
-             }
-
-             if (ModelState.IsValid)
-             {
-                 try
-                 {
-                     _context.Update(productDetail);
-                     await _context.SaveChangesAsync();
-                 }
-                 catch (DbUpdateConcurrencyException)
-                 {
-                     if (!ProductDetailExists(productDetail.Id))
-                     {
-                         return NotFound();
-                     }
-                     else
-                     {
-                         throw;
-                     }
-                 }
-                 return RedirectToAction(nameof(Index));
-             }
-             ViewData["TypeId"] = new SelectList(_context.Types, "Id", "Name", productDetail.TypeId);
-             return View(productDetail);
-         }
-
- */
         public async Task<IActionResult> Delete(int id)
         {
             using (var httpClient = new HttpClient())
@@ -189,7 +223,7 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
             {
                 using (var httpClient = new HttpClient())
                 {
-                    using (var response = await httpClient.DeleteAsync(Const.APIEndPoint + "Combo"))
+                    using (var response = await httpClient.DeleteAsync(Const.APIEndPoint + "ProductDetail/" +id))
                     {
                         if (response.IsSuccessStatusCode)
                         {
@@ -220,24 +254,7 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
         }
 
 
-        /*  [HttpPost, ActionName("Delete")]
-          [ValidateAntiForgeryToken]
-          public async Task<IActionResult> DeleteConfirmed(string id)
-          {
-              var productDetail = await _context.ProductDetails.FindAsync(id);
-              if (productDetail != null)
-              {
-                  _context.ProductDetails.Remove(productDetail);
-              }
-
-              await _context.SaveChangesAsync();
-              return RedirectToAction(nameof(Index));
-          }
-
-          private bool ProductDetailExists(int id)
-          {
-              return _context.ProductDetails.Any(e => e.Id == id);
-          }*/
+        
 
         public async Task<List<FENGSHUIKOI.Data.Models.Type>> GetType()
         {
