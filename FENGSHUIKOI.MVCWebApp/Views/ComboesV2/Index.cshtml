@@ -1,0 +1,171 @@
+﻿@model IEnumerable<FENGSHUIKOI.Data.Models.Combo>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="row">
+    <div class="col-md-10">
+        <h3 class="display-8">Combo List</h3>
+    </div>
+    <div class="col-md-2 text-end">
+        <button type="button" class="btn btn-primary" onclick="add();">
+            Add
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-striped table-bordered table-hover">
+            <thead>
+                <tr class="card-header">
+                    <th class="card-title text-center">ComboName</th>
+                    <th class="card-title text-center">ComboPrice</th>
+                    <th class="card-title text-center">Discount</th>
+                    <th class="card-title text-center">Status</th>
+                    <th class="card-title text-center">CreatedBy</th>
+                    <th class="card-title text-center">CreatedAt</th>
+                    <th class="card-title text-center">UpdatedAt</th>
+                    <th class="card-title text-center">Element</th>
+                    <th class="card-title text-center">Member</th>
+                    <th class="card-title text-center">ProductDetail</th>
+                </tr>
+            </thead>
+            <tbody class="tblCombo">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="comboModal" tabindex="-1" aria-labelledby="comboModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            @using (Html.BeginForm("Create", "ComboesV2", FormMethod.Post, new { name = "frm", id = "frm" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="comboModalLabel">Combo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="comboModalContent">
+                    <div class="mb-3">
+                        <label for="Element" class="form-label">Element</label>
+                        <select class="form-select" id="ElementId" name="ElementId" required>
+                            <option value="" disabled selected>Select an Element</option>
+                            @foreach (var element in ViewBag.Elements as SelectList)
+                            {
+                                <option value="@element.Value">@element.Text</option>
+                            }
+
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="Member" class="form-label">Member</label>
+
+                        <select class="form-select" id="MemberId" name="MemberId" required>
+                            <option value="" disabled selected>Select an Member</option>
+                            @foreach (var member in ViewBag.Members as SelectList)
+                            {
+                                <option value="@member.Value">@member.Text</option>
+                            }
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="ProductDetail" class="form-label">Product Detail</label>
+
+                        <select class="form-select" id="ProductDetailId" name="ProductDetailId" required>
+                            <option value="" disabled selected>Select a Product Detail</option>
+                            @foreach (var productDetail in ViewBag.ProductDetails as SelectList)
+                            {
+                                <option value="@productDetail.Value">@productDetail.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div>
+                        <label for="ComboName" class="form-label">ComboName</label>
+                        <input type="text" class="form-control" id="ComboName" name="ComboName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ComboPrice" class="form-label">ComboPrice</label>
+                        <input type="text" class="form-control" id="ComboPrice" name="ComboPrice" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Discount" class="form-label">Discount</label>
+                        <input type="text" class="form-control" id="Discount" name="Discount" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Status" class="form-label">Status</label>
+                        <input type="text" class="form-control" id="Status" name="Status" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="CreatedBy" class="form-label">Created By</label>
+                        <input type="text" class="form-control" id="CreatedBy" name="CreatedBy" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="CreatedAt" class="form-label">Created At</label>
+                        <input type="text" class="form-control" id="CreatedAt" name="CreatedAt" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="UpdatedAt" class="form-label">Updated At</label>
+                        <input type="text" class="form-control" id="UpdatedAt" name="UpdatedAt" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="btSave" type="submit" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            loadData();
+        });
+
+        function loadData() {
+            alert("Load data progressing [APIService must add CORS and set AllowAny*]");
+            $.ajax({
+                url: 'https://localhost:7194/api/Comboes',
+                type: "GET",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    alert('Server response: ' + result.message);
+                    console.log(result);
+                    var html = '';
+                    $.each(result.data, function (key, item) {
+                        html += '<tr>';
+                        html += '<td>' + item.comboName + '</td>';
+                        html += '<td>' + item.comboPrice + '</td>';
+                        html += '<td>' + item.discount + '</td>';
+                        html += '<td>' + item.status + '</td>';
+                        html += '<td>' + item.createdBy + '</td>';
+                        html += '<td>' + item.createdAt + '</td>';
+                        html += '<td>' + item.updatedAt + '</td>';
+                        html += '<td>' + item.elementId + '</td>';
+                        html += '<td>' + item.memberId + '</td>';
+                        html += '<td>' + item.productDetailId + '</td>';
+                        html += '<td></td>';
+                        html += '</tr>';
+                    });
+                    $('.tblCombo').html(html);
+                },
+                error: function (xhr, error) {
+                    alert(xhr.statusText);
+                }
+            });
+        }
+
+        function add() {
+            $("#comboModalLabel").html("Add New");
+            $('#comboModal').modal('show');
+        }
+    </script>
+
+}
