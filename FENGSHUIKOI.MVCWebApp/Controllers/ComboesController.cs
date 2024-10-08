@@ -7,27 +7,27 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using FENGSHUIKOI.Data.Models;
 using FENGSHUIKOI.Common;
-
 using Newtonsoft.Json;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 using FENGSHUIKOI.Service.Base;
+using System.Data;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace FENGSHUIKOI.MVCWebApp.Controllers
 {
-    public class SuitableObjectsController : Controller
+    public class ComboesController : Controller
     {
-        public SuitableObjectsController()
+        public ComboesController()
         {
         }
 
-        // GET: SuitableObjects
+        // GET: Comboes
         public async Task<IActionResult> Index()
         {
             using (var httpClient = new HttpClient())
             {
                 try
                 {
-                    using (var response = await httpClient.GetAsync(Const.APIEndPoint + "suitableObject"))
+                    using (var response = await httpClient.GetAsync(Const.APIEndPoint + "Comboes"))
                     {
                         if (response.IsSuccessStatusCode)
                         {
@@ -36,7 +36,7 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
 
                             if (result != null && result.Data != null)
                             {
-                                var data = JsonConvert.DeserializeObject<List<SuitableObject>>(result.Data.ToString());
+                                var data = JsonConvert.DeserializeObject<List<Combo>>(result.Data.ToString());
                                 return View(data);
                             }
                         }
@@ -44,24 +44,22 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
                 }
                 catch (HttpRequestException ex)
                 {
-                    // Log the exception (consider using a logging framework)
                     Console.WriteLine($"Request error: {ex.Message}");
                 }
                 catch (Exception ex)
                 {
-                    // Catch any other exceptions
                     Console.WriteLine($"Unexpected error: {ex.Message}");
                 }
             }
-            return View(new List<SuitableObject>());
+            return View(new List<Combo>());
         }
 
-        // GET: SuitableObjects/Details/5
+        // GET: Comboes/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             using (var httpClient = new HttpClient())
             {
-                using (var response = await httpClient.GetAsync(Const.APIEndPoint + $"suitableObject/{id}"))
+                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "Comboes/" + id))
                 {
                     if (response.IsSuccessStatusCode)
                     {
@@ -69,43 +67,45 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
                         var result = JsonConvert.DeserializeObject<BusinessResult>(content);
                         if (result != null && result.Data != null)
                         {
-                            var data = JsonConvert.DeserializeObject<SuitableObject>(result.Data.ToString());
+                            var data = JsonConvert.DeserializeObject<Combo>(result.Data.ToString());
+                            ViewData["MemberId"] = new SelectList(await this.GetMembers(), "Id", "Name", data.Id);
+                            ViewData["ElementId"] = new SelectList(await this.GetElements(), "Id", "Name", data.Id);
+                            ViewData["ProductDetailId"] = new SelectList(await this.GetProductDetails(), "Id", "Name", data.Id);
                             return View(data);
                         }
                     }
                 }
             }
-            return View(new List<Member>());
+            return View(new List<Combo>());
         }
 
-        // GET: SuitableObjects/Create
+        // GET: Comboes/Create
         public async Task<IActionResult> Create()
         {
+            ViewData["MemberId"] = new SelectList(await this.GetMembers(), "Id", "Name");
             ViewData["ElementId"] = new SelectList(await this.GetElements(), "Id", "Name");
-            ViewData["TypeId"] = new SelectList(await this.GetTypes(), "Id", "Name");
+            ViewData["ProductDetailId"] = new SelectList(await this.GetProductDetails(), "Id", "Name");
             return View();
         }
 
-        // POST: SuitableObjects/Create
+        // POST: Comboes/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,ElementId,TypeId,Color,Size,Direction,Position,Shape,Volume,WaterQuality,WaterTemperature,InformationDirection,Flag")] SuitableObject suitableObject)
+        public async Task<IActionResult> Create([Bind("Id,MemberId,ElementId,ProductDetailId,ComboName,ComboPrice,Discount,Status,CreatedBy,CreatedAt")] Combo combo)
         {
             bool saveStatus = false;
-
             if (ModelState.IsValid)
             {
-                using (var httpClient = new HttpClient())
+                using (var httpCilent = new HttpClient())
                 {
-                    using (var response = await httpClient.PostAsJsonAsync(Const.APIEndPoint + "suitableObject/", suitableObject))
+                    using (var response = await httpCilent.PostAsJsonAsync(Const.APIEndPoint + "Comboes/", combo))
                     {
                         if (response.IsSuccessStatusCode)
                         {
-                            var context = await response.Content.ReadAsStringAsync();
-                            var result = JsonConvert.DeserializeObject<BusinessResult>(context);
-
+                            var content = await response.Content.ReadAsStringAsync();
+                            var result = JsonConvert.DeserializeObject<BusinessResult>(content);
                             if (result != null && result.Message == Const.SUCCESS_CREATE_MSG)
                             {
                                 saveStatus = true;
@@ -118,134 +118,118 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
                     }
                 }
             }
-
             if (saveStatus)
             {
                 return RedirectToAction(nameof(Index));
             }
             else
             {
-                ViewData["ElementId"] = new SelectList(await this.GetElements(), "Id", "Name");
-                ViewData["TypeId"] = new SelectList(await this.GetTypes(), "Id", "Name");
-                return View(suitableObject);
+                ViewData["MemberId"] = new SelectList(await this.GetMembers(), "Id", "Name", combo.Id);
+                ViewData["ElementId"] = new SelectList(await this.GetElements(), "Id", "Name", combo.Id);
+                ViewData["ProductDetailId"] = new SelectList(await this.GetProductDetails(), "Id", "Name", combo.Id);
+                return View(combo);
             }
         }
 
-        // GET: SuitableObjects/Edit
+        // GET: Comboes/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
+            using (var httpCilent = new HttpClient())
             {
-                return NotFound();
-            }
-
-            using (var httpClient = new HttpClient())
-            {
-                try
-                {
-                    using (var response = await httpClient.GetAsync(Const.APIEndPoint + "suitableObject/" + id))
-                    {
-                        if (response.IsSuccessStatusCode)
-                        {
-                            var content = await response.Content.ReadAsStringAsync();
-                            var result = JsonConvert.DeserializeObject<BusinessResult>(content);
-
-
-                            if (result == null || result.Status == 404)
-                            {
-                                return NotFound();
-                            }
-                            if (result != null)
-                            {
-                                var data = JsonConvert.DeserializeObject<Element>(result.Data.ToString());
-                                return View(data);
-                            }
-                        }
-                    }
-                }
-                catch (HttpRequestException ex)
-                {
-                    Console.WriteLine($"Request error: {ex.Message}");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Unexpected error: {ex.Message}");
-                }
-            }
-
-
-            return View(new Element());
-        }
-
-        // POST: SuitableObjects/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,ElementId,TypeId,Color,Size,Direction,Position,Shape,Volume,WaterQuality,WaterTemperature,InformationDirection,Flag")] SuitableObject suitableObject)
-        {
-            bool updateStatus = false;
-            
-            if (ModelState.IsValid)
-            {
-                using (var httpClient = new HttpClient())
-                {
-                    using (var response = await httpClient.PutAsJsonAsync(Const.APIEndPoint + "suitableObject/", suitableObject))
-                    {
-                        if (response.IsSuccessStatusCode)
-                        {
-                            var context = await response.Content.ReadAsStringAsync();
-                            var result = JsonConvert.DeserializeObject<BusinessResult>(context);
-
-                            if (result != null && result.Message == Const.SUCCESS_UDATE_MSG)
-                            {
-                                updateStatus = true;
-                            }
-                            else
-                            {
-                                updateStatus = false;
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (updateStatus)
-            {
-                return RedirectToAction(nameof(Index));
-            }
-            else
-            {
-                ViewData["ElementId"] = new SelectList(await this.GetElements(), "Id", "Name");
-                ViewData["TypeId"] = new SelectList(await this.GetTypes(), "Id", "Name");
-                return View(suitableObject);
-            }
-        }
-
-        // GET: SuitableObjects/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            using (var httpClient = new HttpClient())
-            {
-                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "suitableObject/" + id))
+                using (var response = await httpCilent.GetAsync(Const.APIEndPoint + "Comboes/" + id))
                 {
                     if (response.IsSuccessStatusCode)
                     {
                         var content = await response.Content.ReadAsStringAsync();
                         var result = JsonConvert.DeserializeObject<BusinessResult>(content);
-
-                        if (result != null && result.Data != null)
+                        if (result == null || result.Status == 404)
                         {
-                            var data = JsonConvert.DeserializeObject<SuitableObject>(result.Data.ToString());
+                            return NotFound();
+                        }
+                        if (result != null)
+                        {
+                            var data = JsonConvert.DeserializeObject<Combo>(result.Data.ToString());
+                            ViewData["MemberId"] = new SelectList(await this.GetMembers(), "Id", "Name", data.Id);
+                            ViewData["ElementId"] = new SelectList(await this.GetElements(), "Id", "Name", data.Id);
+                            ViewData["ProductDetailId"] = new SelectList(await this.GetProductDetails(), "Id", "Name", data.Id);
                             return View(data);
                         }
                     }
                 }
             }
-            return View(new SuitableObject());
+            return View(new Combo());
         }
 
-        // POST: SuitableObjects/Delete/5
+        // POST: Comboes/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("Id,MemberId,ElementId,ProductDetailId,ComboName,ComboPrice,Discount,Status,CreatedBy,CreatedAt")] Combo combo)
+        {
+            bool saveStatus = false;
+            if (ModelState.IsValid)
+            {
+                using (var httpCilent = new HttpClient())
+                {
+                    using (var response = await httpCilent.PostAsJsonAsync(Const.APIEndPoint + "Comboes/", combo))
+                    {
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var content = await response.Content.ReadAsStringAsync();
+                            var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                            if (result != null && result.Message == Const.SUCCESS_UDATE_MSG)
+                            {
+                                saveStatus = true;
+                            }
+                            else
+                            {
+                                saveStatus = false;
+                            }
+                        }
+                    }
+                }
+            }
+            if (saveStatus)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                ViewData["MemberId"] = new SelectList(await this.GetMembers(), "Id", "Name", combo.Id);
+                ViewData["ElementId"] = new SelectList(await this.GetElements(), "Id", "Name", combo.Id);
+                ViewData["ProductDetailId"] = new SelectList(await this.GetProductDetails(), "Id", "Name", combo.Id);
+                return View(combo);
+            }
+        }
+
+        // GET: Comboes/Delete/5
+        public async Task<IActionResult> Delete(int id)
+        {
+            using (var httpClient = new HttpClient())
+            {
+                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "Comboes/" + id))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                        if (result != null && result.Data != null)
+                        {
+                            var data = JsonConvert.DeserializeObject<Combo>(result.Data.ToString());
+                            ViewData["MemberId"] = new SelectList(await this.GetMembers(), "Id", "Name", data.Id);
+                            ViewData["ElementId"] = new SelectList(await this.GetElements(), "Id", "Name", data.Id);
+                            ViewData["ProductDetailId"] = new SelectList(await this.GetProductDetails(), "Id", "Name", data.Id);
+                            return View(data);
+                        }
+                    }
+                }
+
+            }
+            return View(new Combo());
+        }
+
+        // POST: Comboes/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -256,13 +240,14 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
             {
                 using (var httpClient = new HttpClient())
                 {
-                    using (var response = await httpClient.DeleteAsync(Const.APIEndPoint + "suitableObject/" + id))
+                    using (var response = await httpClient.DeleteAsync(Const.APIEndPoint + "Comboes/" + id))
                     {
                         if (response.IsSuccessStatusCode)
                         {
-                            var context = await response.Content.ReadAsStringAsync();
-                            var result = JsonConvert.DeserializeObject<BusinessResult>(context);
-                            if (result != null && result.Message == Const.SUCCESS_DELETE_MSG)
+                            var content = await response.Content.ReadAsStringAsync();
+                            var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+
+                            if (result != null && result.Status == Const.SUCCESS_DELETE)
                             {
                                 deleteStatus = true;
                             }
@@ -281,21 +266,16 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
             }
             else
             {
-                return RedirectToAction(nameof(Delete));
+                return RedirectToAction(nameof(Index));
             }
         }
 
-/*        private bool SuitableObjectExists(int id)
+        public async Task<List<Member>> GetMembers()
         {
-            return _context.SuitableObjects.Any(e => e.Id == id);
-        }*/
-
-        public async Task<List<FENGSHUIKOI.Data.Models.Type>> GetTypes()
-        {
-            var types = new List<FENGSHUIKOI.Data.Models.Type>();
+            var member = new List<Member>();
             using (var httpClient = new HttpClient())
             {
-                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "type"))
+                using (var response = await httpClient.GetAsync("https://localhost:7194/" + "member"))
                 {
                     if (response.IsSuccessStatusCode)
                     {
@@ -304,18 +284,18 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
 
                         if (rs != null && rs.Data != null)
                         {
-                            types = JsonConvert.DeserializeObject<List<FENGSHUIKOI.Data.Models.Type>>(rs.Data.ToString());
+                            member = JsonConvert.DeserializeObject<List<Member>>(rs.Data.ToString());
                         }
 
                     }
                 }
             }
-            return types;
-        }        
+            return member;
+        }
         
-        public async Task<List<FENGSHUIKOI.Data.Models.Element>> GetElements()
+        public async Task<List<Element>> GetElements()
         {
-            var elements = new List<FENGSHUIKOI.Data.Models.Element>();
+            var elements = new List<Element>();
             using (var httpClient = new HttpClient())
             {
                 using (var response = await httpClient.GetAsync("https://localhost:7194/" + "elements"))
@@ -327,14 +307,37 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
 
                         if (rs != null && rs.Data != null)
                         {
-                            elements = JsonConvert.DeserializeObject<List<FENGSHUIKOI.Data.Models.Element>>(rs.Data.ToString());
+                            elements = JsonConvert.DeserializeObject<List<Element>>(rs.Data.ToString());
                         }
 
                     }
                 }
             }
             return elements;
-
         }
+        
+        public async Task<List<ProductDetail>> GetProductDetails()
+        {
+            var productDetails = new List<ProductDetail>();
+            using (var httpClient = new HttpClient())
+            {
+                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "ProductDetail"))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        var rs = JsonConvert.DeserializeObject<BusinessResult>(content);
+
+                        if (rs != null && rs.Data != null)
+                        {
+                            productDetails = JsonConvert.DeserializeObject<List<ProductDetail>>(rs.Data.ToString());
+                        }
+
+                    }
+                }
+            }
+            return productDetails;
+        }
+
     }
 }

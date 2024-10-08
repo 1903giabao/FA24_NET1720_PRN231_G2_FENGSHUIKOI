@@ -22,7 +22,7 @@ namespace FENGSHUIKOI.APIService.Controllers
             var result = await _productDetailService.GetAll();
             if (result.Status == Const.SUCCESS_READ)
             {
-                return Ok(result.Data);
+                return Ok(result);
             }
             return NotFound(result.Message);
         }

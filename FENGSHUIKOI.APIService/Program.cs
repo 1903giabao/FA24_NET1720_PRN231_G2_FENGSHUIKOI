@@ -14,6 +14,19 @@ namespace FENGSHUIKOI.APIService
             // Add services to the container.
 
             builder.Services.AddControllers();
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                               .AllowAnyMethod()
+                               .AllowAnyHeader();
+                    });
+            });
+
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -34,11 +47,14 @@ namespace FENGSHUIKOI.APIService
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-            app.UseCors((opt)=>opt.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+
+            app.UseCors("AllowAll");
+
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
 
+            app.UseCors("AllowAnyOrigin");
 
             app.MapControllers();
 

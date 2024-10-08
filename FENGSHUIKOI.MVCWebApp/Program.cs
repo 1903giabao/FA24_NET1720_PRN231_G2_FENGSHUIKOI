@@ -1,4 +1,5 @@
 using FENGSHUIKOI.Data.Models;
+using FENGSHUIKOI.Service.Services;
 
 
 namespace FENGSHUIKOI.MVCWebApp
@@ -12,6 +13,25 @@ namespace FENGSHUIKOI.MVCWebApp
       
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<NET1720_231_2_FENGSHUIKOIContext>();
+            builder.Services.AddScoped<ElementService>();
+            builder.Services.AddScoped<TypeService>();
+            builder.Services.AddScoped<SuitableObjectService>();
+            builder.Services.AddScoped<ComboService>();
+            builder.Services.AddScoped<MemberService>();
+            builder.Services.AddScoped<ProductDetailService>();
+
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAnyOrigin",
+                    builder =>
+                    {
+                        builder.AllowAnyOrigin()
+                               .AllowAnyHeader()
+                               .AllowAnyMethod();
+                    });
+            });
+
 
             var app = builder.Build();
 
@@ -27,6 +47,7 @@ namespace FENGSHUIKOI.MVCWebApp
             app.UseStaticFiles();
 
             app.UseRouting();
+            app.UseCors("AllowAnyOrigin");
 
             app.UseAuthorization();
 
