@@ -122,6 +122,8 @@ namespace FENGSHUIKOI.Service.Services
                 var newProduct = new ProductDetail
                 {
                     Name = productDetail.Name,
+                    TypeId = productDetail.TypeId,
+                    
                     Description = productDetail.Description,
                     ComboId = productDetail.ComboId,
                     Quantity = productDetail.Quantity,

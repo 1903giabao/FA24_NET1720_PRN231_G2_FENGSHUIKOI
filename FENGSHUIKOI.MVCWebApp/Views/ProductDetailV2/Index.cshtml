@@ -1,14 +1,12 @@
 ﻿@model IEnumerable<FENGSHUIKOI.Data.Models.ProductDetail>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Product Detail List";
 }
-
-
 
 <div class="row">
     <div class="col-md-10">
-        <h3 class="display-8">Bank List</h3>
+        <h3 class="display-8">Product Detail List</h3>
     </div>
     <div class="col-md-2 text-end">
         <button type="button" class="btn btn-primary" onclick="add();">
@@ -30,10 +28,9 @@
                     <th class="card-title text-center">Size</th>
                     <th class="card-title text-center">Origin</th>
                     <th class="card-title text-center">Status</th>
-                    <th class="card-title text-center">CreateDate</th>
+                    <th class="card-title text-center">Create Date</th>
                     <th class="card-title text-center">TypeId</th>
                     <th class="card-title text-center">ComboId</th>
-                    <th class="card-title text-center"></th>
                 </tr>
             </thead>
             <tbody class="tblProductDetail">
@@ -42,18 +39,64 @@
     </div>
 </div>
 
-
-<div class="modal fade" id="bankModal" tabindex="-1" aria-labelledby="bankModalLabel" aria-hidden="true">
+<!-- Modal for Adding New Product Detail -->
+<div class="modal fade" id="productDetailModal" tabindex="-1" aria-labelledby="productDetailModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            @using (Html.BeginForm(null, null, FormMethod.Post, new { name = "frm", id = "frm" }))
+            @using (Html.BeginForm("Create", "ProductDetailV2", FormMethod.Post, new { name = "frm", id = "frm" }))
             {
                 @Html.AntiForgeryToken()
                 <div class="modal-header">
-                    <h5 class="modal-title" id="bankModalLabel">Bank</h5>
+                    <h5 class="modal-title" id="productDetailModalLabel">Product Detail</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+
+
+                <input type="hidden" class="form-control" id="ProductDetailId" required>
+                <div class="modal-body" id="productDetailModalContent">
+                    <div class="mb-3">
+                        <label for="Name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="Name" name="Name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Description" class="form-label">Description</label>
+                        <input type="text" class="form-control" id="Description" name="Description" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Color" class="form-label">Color</label>
+                        <input type="text" class="form-control" id="Color" name="Color" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Type" class="form-label">Type</label>
+                        <input type="text" class="form-control" id="Type" name="Type" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Quantity" class="form-label">Quantity</label>
+                        <input type="number" class="form-control" id="Quantity" name="Quantity" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="TypeId" class="form-label">Type</label>
+                        <select class="form-select" id="TypeId" name="TypeId" required>
+                            <option value="" disabled selected>Select a Type</option>
+                            
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Size" class="form-label">Size</label>
+                        <input type="text" class="form-control" id="Size" name="Size" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Origin" class="form-label">Origin</label>
+                        <input type="text" class="form-control" id="Origin" name="Origin" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="Status" class="form-label">Status</label>
+                        <input type="text" class="form-control" id="Status" name="Status" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ComboId" class="form-label">Combo Id</label>
+                        <input type="text" class="form-control" id="ComboId" name="ComboId" required>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button id="btSave" type="button" class="btn btn-primary">Save</button>
@@ -64,25 +107,56 @@
     </div>
 </div>
 
-
 @section scripts {
     <script type="text/javascript">
-        $(document).ready(function() {
+        var typesData = [];
+
+
+        $(document).ready(function () {
             loadData();
+            loadTypeList();
+
         });
 
-        function loadData(){
-            alert("Load data progressing [APIService must add CORS and set AllowAny*]");
+
+        function loadTypeList() {
+            $.ajax({
+                type: 'GET',
+                url: 'https://localhost:7194/api/type',
+                success: function (result) {
+                    console.log(result);
+                    typesData = result.data;
+                    $.each(result.data, function (key, item) {
+                        $('#TypeId').append(
+                            $('<option>', {
+                                value: item.id,
+                                text: item.name
+                            })
+                        );
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching elements:", error);
+                }
+            });
+        }
+
+        function loadData() {
             $.ajax({
                 url: 'https://localhost:7194/api/ProductDetail',
-                type: "GET", 
-                dataType: "json",
-               
+                type: "GET",
                 contentType: "application/json;charset=utf-8",
+                dataType: "json",
                 success: function (result) {
                     alert('Server response: ' + result.message);
                     console.log(result);
                     var html = '';
+
+                    var typeMap = {};
+                    $.each(typesData, function (key, item) {
+                        typeMap[item.id] = item.name;
+                    });
+  
                     $.each(result.data, function (key, item) {
                         html += '<tr>';
                         html += '<td>' + item.name + '</td>';
@@ -94,7 +168,7 @@
                         html += '<td>' + item.origin + '</td>';
                         html += '<td>' + item.status + '</td>';
                         html += '<td>' + item.createDate + '</td>';
-                        html += '<td>' + item.typeId + '</td>';
+                        html += '<td>' + typeMap[item.typeId] + '</td>';
                         html += '<td>' + item.comboId + '</td>';
                         html += '<td></td>';
                         html += '</tr>';
@@ -107,6 +181,48 @@
             });
         }
 
+        function add() {
+            $("#productDetailModalLabel").html("Add New Product Detail");
+            $('#productDetailModal').modal('show');
+        }
+
+        $("#btSave").click(function () {
+            $.ajax({
+                type: 'POST',
+                url: 'https://localhost:7194/api/ProductDetail',
+                headers: {
+                    'Accept': 'text/plain',
+                    'Content-type': 'application/json; charset=utf-8'
+                },
+                data: JSON.stringify({
+                    productDetailId: 0, 
+                    name: $("#Name").val(),
+                    description: $("#Description").val(),
+                    color: $("#Color").val(),
+                    type: $("#Type").val(),
+                    quantity: $("#Quantity").val(),
+                    typeId: $("#TypeId").val(),
+                    size: $("#Size").val(),
+                    origin: $("#Origin").val(),
+                    status: $("#Status").val(),
+                    createDate: $("#CreateDate").val(),
+                    comboId: $("#ComboId").val()
+                }),
+                success: function (result) {
+                    if (result.status >= 1) {
+                        $("#productDetailModal").modal('hide');
+                        loadData();
+                    }
+                    alert(result.message);
+                },
+                error: function (xhr, error) {
+                    alert(xhr.responseText);
+                    console.log(xhr);
+                }
+            });
+        });
+
         
+
     </script>
 }
