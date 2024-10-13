@@ -27,18 +27,18 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
 
         public IActionResult Index()
         {
-            var elements = _elementService.GetAll();
+/*            var elements = _elementService.GetAll();
             var types = _typeService.GetAll();
 
             var elementList = (List<Element>) elements.Result.Data;
             var typeList = (List<Data.Models.Type>) types.Result.Data;
 
             ViewBag.Elements = new SelectList(elementList, nameof(Element.Id), nameof(Element.Name));
-            ViewBag.Types = new SelectList(typeList, nameof(Data.Models.Type.Id), nameof(Data.Models.Type.Name));
+            ViewBag.Types = new SelectList(typeList, nameof(Data.Models.Type.Id), nameof(Data.Models.Type.Name));*/
             return View();
         }
 
-        [HttpPost]
+/*        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(SuitableObjectDTO model)
         {
@@ -54,6 +54,6 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
                 throw new Exception("create error");
             }
             return View(model);
-        }
+        }*/
     }
 }
