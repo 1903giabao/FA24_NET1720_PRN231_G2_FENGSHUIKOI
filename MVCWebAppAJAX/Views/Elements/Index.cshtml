@@ -1,0 +1,125 @@
+﻿@model IEnumerable<FENGSHUIKOI.Data.Models.Element>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<div class="row">
+    <div class="col-md-10">
+        <h3 class="display-8">Element List</h3>
+    </div>
+    <div class="col-md-2 text-end">
+        <button type="button" class="btn btn-primary" onclick="add();">
+            Add
+        </button>
+    </div>
+</div>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TabooTime)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ImageUrl)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Status)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LuckyNumbers)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UpdatedAt)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedAt)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CreatedBy)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.UpdateBy)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody class="tblBanks">
+    </tbody>
+</table>
+<div class="modal fade" id="bankModal" tabindex="-1" aria-labelledby="bankModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            @using (Html.BeginForm(null, null, FormMethod.Post, new { name = "frm", id = "frm" }))
+            {
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bankModalLabel">Bank</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button id="btSave" type="button" class="btn btn-primary">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+@section scripts {
+    <script type="text/javascript">
+        $(document).ready(function () {
+            loadData();
+        });
+        function add() {
+            $("#bankModalContent").html("");
+            $("#bankModalLabel").html("Add New");
+
+            $('#bankModal').modal('show');
+        }
+        function loadData() {
+            alert("Load data progressing...");
+            $.ajax({
+                url: 'https://localhost:7194/elements',
+                type: "GET",
+                contentType: "application/json;charset=utf-8",
+                dataType: "json",
+                success: function (result) {
+                    alert('Server response: ' + result.message);
+                    console.log(result.data);
+                    var html = '';
+                    $.each(result.data, function (key, item) {
+                        html += '<tr>';
+                        html += '<td>' + item.name + '</td>';
+                        html += '<td>' + item.description + '</td>';
+                        html += '<td>' + item.tabooTime + '</td>';
+                        html += '<td>' + item.imageUrl + '</td>';
+                        html += '<td>' + item.status + '</td>';
+                        html += '<td>' + item.luckyNumbers + '</td>';
+                        html += '<td>' + item.updatedAt + '</td>';
+                        html += '<td>' + item.createdAt + '</td>';
+                        html += '<td>' + item.createdBy + '</td>';
+                        html += '<td>' + item.updateBy + '</td>';
+                        html += '<td><a href="/Elements/' + item.id + '">Edit</a> | ';
+                        html += '<a href="/Elements/' + item.id + '">Details</a> | ';
+                        html += '<a href="/Elements/' + item.id + '">Delete</a></td>';
+                        html += '</tr>';
+                    });
+                    $('.tblBanks').html(html);
+                },
+                error: function (xhr, error) {
+                    alert(xhr.statusText);
+                }
+            });
+        }
+    </script>
+}

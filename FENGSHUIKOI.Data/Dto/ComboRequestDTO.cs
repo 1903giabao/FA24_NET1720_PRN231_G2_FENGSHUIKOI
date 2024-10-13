@@ -8,7 +8,6 @@ namespace FENGSHUIKOI.Data.Dto
 {
     public class ComboRequestDTO
     {
-        public int Id { get; set; }
 
         public int? MemberId { get; set; }
 

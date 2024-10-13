@@ -24,7 +24,8 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
 
         public async Task<IActionResult> Index()
         {
-            using (var httpClient = new HttpClient())
+            return View();
+            /*using (var httpClient = new HttpClient())
             {
                 try
                 {
@@ -52,7 +53,7 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
                     Console.WriteLine($"Unexpected error: {ex.Message}");
                 }
             }
-            return View(new List<Element>());
+            return View(new List<Element>());*/
         }
 
         // GET: Elements/Details/5

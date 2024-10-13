@@ -50,16 +50,12 @@
                     <h5 class="modal-title" id="suitableObjectModalLabel">Suitable Object</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+                <input type="hidden" class="form-control" id="SuitableObjectId" name="Color" required>
                 <div class="modal-body" id="suitableObjectModalContent">
                     <div class="mb-3">
                         <label for="Element" class="form-label">Element</label>
                         <select class="form-select" id="ElementId" name="ElementId" required>
-                            <option value="" disabled selected>Select an Element</option>
-                            @foreach (var element in ViewBag.Elements as SelectList)
-                            {
-                                <option value="@element.Value">@element.Text</option>
-                            }
-                            
+                            <option value="" disabled selected>Select an Element</option>                          
                         </select>
                     </div>
                     <div class="mb-3">
@@ -67,10 +63,6 @@
 
                         <select class="form-select" id="TypeId" name="TypeId" required>
                             <option value="" disabled selected>Select a Type</option>
-                            @foreach (var type in ViewBag.Types as SelectList)
-                            {
-                                <option value="@type.Value">@type.Text</option>
-                            }
                         </select>
                     </div>
                     <div>
@@ -115,7 +107,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button id="btSave" type="submit" class="btn btn-primary">Save</button>
+                    <button id="btSave" type="button" class="btn btn-primary">Save</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             }
@@ -125,9 +117,59 @@
 
 @section scripts {
     <script type="text/javascript">
+        var elementsData = [];
+        var typesData = [];
         $(document).ready(function() {
             loadData();
+            loadElementList();
+            loadTypeList();
         });
+
+        function loadElementList() {
+            $.ajax({
+                type: 'GET',
+                url: 'https://localhost:7194/elements',
+                success: function (result) {
+                    console.log(result);
+                    elementsData = result.data;
+                    console.log(elementsData);
+                    $.each(result.data, function (key, item) {
+                        $('#ElementId').append(
+                            $('<option>', {
+                                value: item.id,
+                                text: item.name
+                            })
+                        );
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching elements:", error);
+                }
+            });
+        }
+
+        function loadTypeList() {
+            $.ajax({
+                type: 'GET',
+                url: 'https://localhost:7194/api/type',
+                success: function (result) {
+                    console.log(result);
+                    typesData = result.data;
+                    console.log(elementsData);
+                    $.each(result.data, function (key, item) {
+                        $('#TypeId').append(
+                            $('<option>', {
+                                value: item.id,
+                                text: item.name
+                            })
+                        );
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching elements:", error);
+                }
+            });
+        }
 
         function loadData(){
             alert("Load data progressing [APIService must add CORS and set AllowAny*]");
@@ -140,6 +182,15 @@
                     alert('Server response: ' + result.message);
                     console.log(result);
                     var html = '';
+                    var elementMap = {};
+                    $.each(elementsData, function (key, item) {
+                        elementMap[item.id] = item.name;
+                    });                    
+                    var typeMap = {};
+                    $.each(typesData, function (key, item) {
+                        typeMap[item.id] = item.name;
+                    });
+                    console.log(elementMap);
                     $.each(result.data, function (key, item) {
                         html += '<tr>';
                         html += '<td>' + item.color + '</td>';
@@ -152,8 +203,8 @@
                         html += '<td>' + item.waterTemperature + '</td>';
                         html += '<td>' + item.informationDirection + '</td>';
                         html += '<td>' + item.flag + '</td>';
-                        html += '<td>' + item.elementId + '</td>';
-                        html += '<td>' + item.typeId + '</td>';
+                        html += '<td>' + elementMap[item.elementId] + '</td>';
+                        html += '<td>' + typeMap[item.typeId] + '</td>';
                         html += '<td></td>';
                         html += '</tr>';
                     });
@@ -169,6 +220,43 @@
             $("#suitableObjectModalLabel").html("Add New");
             $('#suitableObjectModal').modal('show');
         }
+
+        $("#btSave").click(function () {
+            $.ajax({
+                type: 'POST',
+                url: 'https://localhost:7194/api/suitableObject',
+                headers: {
+                    'Accept': 'text/plain',
+                    'Content-type': 'application/json; charset=utf-8'
+                },
+                data: JSON.stringify({
+                    suitableObjectId: 0,
+                    elementId: $("#ElementId").val(),
+                    typeId: $("#TypeId").val(),
+                    color: $("#Color").val(),
+                    size: $("#Size").val(),
+                    direction: $("#Direction").val(),
+                    position: $("#Position").val(),
+                    shape: $("#Shape").val(),
+                    volume: $("#Volume").val(),
+                    waterQuality: $("#WaterQuality").val(),
+                    waterTemperature: $("#WaterTemperature").val(),
+                    informationDirection: $("#InformationDirection").val(),
+                    flag: $("#Flag").val()
+                }),
+                success: function (result) {
+                    if (result.status >= 1) {
+                        $("#suitableObjectModal").modal('hide');
+                        loadData();
+                    }
+                    alert(result.message);
+                },
+                error: function(xhr, error) {
+                    alert(xhr.responseText);
+                    console.log(xhr);
+                }
+            });
+        });
     </script>
 
 }

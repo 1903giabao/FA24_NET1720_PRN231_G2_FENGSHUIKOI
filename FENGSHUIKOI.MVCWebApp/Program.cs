@@ -16,6 +16,9 @@ namespace FENGSHUIKOI.MVCWebApp
             builder.Services.AddScoped<ElementService>();
             builder.Services.AddScoped<TypeService>();
             builder.Services.AddScoped<SuitableObjectService>();
+            builder.Services.AddScoped<ComboService>();
+            builder.Services.AddScoped<MemberService>();
+
             builder.Services.AddScoped<ProductDetailService>();
 
 
