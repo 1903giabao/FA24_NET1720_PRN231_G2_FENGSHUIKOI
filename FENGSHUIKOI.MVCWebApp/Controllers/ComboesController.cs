@@ -172,7 +172,7 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
             {
                 using (var httpCilent = new HttpClient())
                 {
-                    using (var response = await httpCilent.PostAsJsonAsync(Const.APIEndPoint + "Comboes/", combo))
+                    using (var response = await httpCilent.PutAsJsonAsync(Const.APIEndPoint + "Comboes/" + id, combo))
                     {
                         if (response.IsSuccessStatusCode)
                         {
