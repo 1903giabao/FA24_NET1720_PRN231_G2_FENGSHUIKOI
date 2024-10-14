@@ -26,38 +26,103 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
         }
 
         // GET: ProductDetails
+        /* public async Task<IActionResult> Index()
+         {
+             using (var httpClient = new HttpClient())
+             {
+                 try
+                 {
+                     using (var response = await httpClient.GetAsync(Const.APIEndPoint + "ProductDetail"))
+                     {
+                         if (response.IsSuccessStatusCode)
+                         {
+                             var content = await response.Content.ReadAsStringAsync();
+                             var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+
+                             if (result != null && result.Data != null)
+                             {
+                                 var data = JsonConvert.DeserializeObject<List<ProductDetail>>(result.Data.ToString());
+                                 return View(data);
+                             }
+                         }
+                     }
+                 }
+                 catch (HttpRequestException ex)
+                 {
+                     Console.WriteLine($"Request error: {ex.Message}");
+                 }
+                 catch (Exception ex)
+                 {
+                     Console.WriteLine($"Unexpected error: {ex.Message}");
+                 }
+             }
+             return View(new List<ProductDetail>());
+         }*/
+
+
         public async Task<IActionResult> Index()
         {
+            // Load ProductDetail data
+            var productDetails = new List<ProductDetail>();
             using (var httpClient = new HttpClient())
             {
-                try
+                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "ProductDetail"))
                 {
-                    using (var response = await httpClient.GetAsync(Const.APIEndPoint + "ProductDetail"))
+                    if (response.IsSuccessStatusCode)
                     {
-                        if (response.IsSuccessStatusCode)
+                        var content = await response.Content.ReadAsStringAsync();
+                        var result = JsonConvert.DeserializeObject<BusinessResult>(content);
+                        if (result != null && result.Data != null)
                         {
-                            var content = await response.Content.ReadAsStringAsync();
-                            // Directly deserialize into a List<ProductDetail>
-                            var data = JsonConvert.DeserializeObject<List<ProductDetail>>(content);
-
-                            if (data != null)
-                            {
-                                return View(data);
-                            }
+                            productDetails = JsonConvert.DeserializeObject<List<ProductDetail>>(result.Data.ToString());
                         }
                     }
                 }
-                catch (HttpRequestException ex)
+            }
+
+            // Load Combos data for displaying Combo names
+            var combos = new List<Combo>();
+            using (var httpClient = new HttpClient())
+            {
+                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "Comboes"))
                 {
-                    Console.WriteLine($"Request error: {ex.Message}");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Unexpected error: {ex.Message}");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        var comboResult = JsonConvert.DeserializeObject<BusinessResult>(content);
+                        if (comboResult != null && comboResult.Data != null)
+                        {
+                            combos = JsonConvert.DeserializeObject<List<Combo>>(comboResult.Data.ToString());
+                        }
+                    }
                 }
             }
-            return View(new List<ProductDetail>());
+
+            // Load Types data for displaying Type names
+            var types = new List<FENGSHUIKOI.Data.Models.Type>();
+            using (var httpClient = new HttpClient())
+            {
+                using (var response = await httpClient.GetAsync(Const.APIEndPoint + "Type"))
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var content = await response.Content.ReadAsStringAsync();
+                        var typeResult = JsonConvert.DeserializeObject<BusinessResult>(content);
+                        if (typeResult != null && typeResult.Data != null)
+                        {
+                            types = JsonConvert.DeserializeObject<List<FENGSHUIKOI.Data.Models.Type>>(typeResult.Data.ToString());
+                        }
+                    }
+                }
+            }
+
+            // Store Combos and Types in ViewData
+            ViewData["Combos"] = combos;
+            ViewData["Types"] = types;
+
+            return View(productDetails);
         }
+
 
 
         public async Task<IActionResult> Details(int? id)
@@ -161,7 +226,7 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
             {
                 using (var httpCilent = new HttpClient())
                 {
-                    using (var response = await httpCilent.PostAsJsonAsync(Const.APIEndPoint + "ProductDetail/", productDetail))
+                    using (var response = await httpCilent.PutAsJsonAsync(Const.APIEndPoint + "ProductDetail/" +id, productDetail))
                     {
                         if (response.IsSuccessStatusCode)
                         {
