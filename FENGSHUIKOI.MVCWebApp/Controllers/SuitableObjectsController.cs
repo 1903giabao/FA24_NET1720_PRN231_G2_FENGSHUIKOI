@@ -157,7 +157,9 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
                             }
                             if (result != null)
                             {
-                                var data = JsonConvert.DeserializeObject<Element>(result.Data.ToString());
+                                var data = JsonConvert.DeserializeObject<SuitableObject>(result.Data.ToString());
+                                ViewData["ElementId"] = new SelectList(await this.GetElements(), "Id", "Name", data.Id);
+                                ViewData["TypeId"] = new SelectList(await this.GetTypes(), "Id", "Name", data.Id);
                                 return View(data);
                             }
                         }
@@ -190,7 +192,7 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
             {
                 using (var httpClient = new HttpClient())
                 {
-                    using (var response = await httpClient.PutAsJsonAsync(Const.APIEndPoint + "suitableObject/", suitableObject))
+                    using (var response = await httpClient.PutAsJsonAsync(Const.APIEndPoint + "suitableObject/" + id, suitableObject))
                     {
                         if (response.IsSuccessStatusCode)
                         {
@@ -313,9 +315,9 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
             return types;
         }        
         
-        public async Task<List<FENGSHUIKOI.Data.Models.Element>> GetElements()
+        public async Task<List<Element>> GetElements()
         {
-            var elements = new List<FENGSHUIKOI.Data.Models.Element>();
+            var elements = new List<Element>();
             using (var httpClient = new HttpClient())
             {
                 using (var response = await httpClient.GetAsync("https://localhost:7194/" + "elements"))
@@ -327,14 +329,13 @@ namespace FENGSHUIKOI.MVCWebApp.Controllers
 
                         if (rs != null && rs.Data != null)
                         {
-                            elements = JsonConvert.DeserializeObject<List<FENGSHUIKOI.Data.Models.Element>>(rs.Data.ToString());
+                            elements = JsonConvert.DeserializeObject<List<Element>>(rs.Data.ToString());
                         }
 
                     }
                 }
             }
             return elements;
-
         }
     }
 }
