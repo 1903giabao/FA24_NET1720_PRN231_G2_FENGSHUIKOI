@@ -74,13 +74,7 @@
                         <label for="Quantity" class="form-label">Quantity</label>
                         <input type="number" class="form-control" id="Quantity" name="Quantity" required>
                     </div>
-                    <div class="mb-3">
-                        <label for="TypeId" class="form-label">Type</label>
-                        <select class="form-select" id="TypeId" name="TypeId" required>
-                            <option value="" disabled selected>Select a Type</option>
-                            
-                        </select>
-                    </div>
+                   
                     <div class="mb-3">
                         <label for="Size" class="form-label">Size</label>
                         <input type="text" class="form-control" id="Size" name="Size" required>
@@ -93,9 +87,21 @@
                         <label for="Status" class="form-label">Status</label>
                         <input type="text" class="form-control" id="Status" name="Status" required>
                     </div>
+
+                     <div class="mb-3">
+                        <label for="TypeId" class="form-label">Type</label>
+                        <select class="form-select" id="TypeId" name="TypeId" required>
+                            <option value="" disabled selected>Select a Type</option>
+                            
+                        </select>
+                    </div>
+
                     <div class="mb-3">
-                        <label for="ComboId" class="form-label">Combo Id</label>
-                        <input type="text" class="form-control" id="ComboId" name="ComboId" required>
+                        <label for="ComboId" class="form-label">Combo</label>
+                        <select class="form-select" id="ComboId" name="ComboId" required>
+                            <option value="" disabled selected>Select a Type</option>
+
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -110,12 +116,12 @@
 @section scripts {
     <script type="text/javascript">
         var typesData = [];
-
+        var comboData = [];
 
         $(document).ready(function () {
             loadData();
             loadTypeList();
-
+            loadComboList();
         });
 
 
@@ -124,7 +130,6 @@
                 type: 'GET',
                 url: 'https://localhost:7194/api/type',
                 success: function (result) {
-                    console.log(result);
                     typesData = result.data;
                     $.each(result.data, function (key, item) {
                         $('#TypeId').append(
@@ -141,6 +146,29 @@
             });
         }
 
+
+        function loadComboList() {
+            $.ajax({
+                type: 'GET',
+                url: 'https://localhost:7194/api/Comboes',
+                success: function (result) {
+                    comboData = result.data;
+                    $.each(result.data, function (key, item) {
+                        $('#ComboId').append(
+                            $('<option>', {
+                                value: item.id,
+                                text: item.comboName
+                            })
+                        );
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error("Error fetching elements:", error);
+                }
+            });
+        }
+
+
         function loadData() {
             $.ajax({
                 url: 'https://localhost:7194/api/ProductDetail',
@@ -149,14 +177,20 @@
                 dataType: "json",
                 success: function (result) {
                     alert('Server response: ' + result.message);
-                    console.log(result);
                     var html = '';
 
                     var typeMap = {};
                     $.each(typesData, function (key, item) {
                         typeMap[item.id] = item.name;
                     });
-  
+
+                    
+                    var comboMap = {};
+                    $.each(comboData, function (key, item) {
+                        comboMap[item.id] = item.comboName;
+                    });
+
+
                     $.each(result.data, function (key, item) {
                         html += '<tr>';
                         html += '<td>' + item.name + '</td>';
@@ -169,11 +203,12 @@
                         html += '<td>' + item.status + '</td>';
                         html += '<td>' + item.createDate + '</td>';
                         html += '<td>' + typeMap[item.typeId] + '</td>';
-                        html += '<td>' + item.comboId + '</td>';
-                        html += '<td></td>';
+                        html += '<td>' + comboMap[item.comboId] + '</td>';
                         html += '</tr>';
                     });
                     $('.tblProductDetail').html(html);
+
+
                 },
                 error: function (xhr, error) {
                     alert(xhr.statusText);
