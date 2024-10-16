@@ -2,6 +2,7 @@
 using FENGSHUIKOI.Data.Models;
 using FENGSHUIKOI.Service.Base;
 using FENGSHUIKOI.Service.Services;
+using System.Text.Json.Serialization;
 
 namespace FENGSHUIKOI.APIService
 {
@@ -22,6 +23,15 @@ namespace FENGSHUIKOI.APIService
             builder.Services.AddScoped<IProductDetailService, ProductDetailService>();
             builder.Services.AddScoped<ISuitableObjectService, SuitableObjectService>();
             builder.Services.AddScoped<IMemberService, MemberService>();
+            builder.Services.AddControllers().AddJsonOptions(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigin",
+                    builder => builder.WithOrigins("https://localhost:7167") 
+                                      .AllowAnyMethod()
+                                      .AllowAnyHeader());
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -29,6 +39,7 @@ namespace FENGSHUIKOI.APIService
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
+                app.UseCors("AllowSpecificOrigin");
             }
 
             app.UseHttpsRedirection();

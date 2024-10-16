@@ -26,7 +26,7 @@ namespace FENGSHUIKOI.Service.Services
             _unitOfWork ??= new UnitOfWork();
         }
         public async Task<IBusinessResult> DeleteById(int id)
-        {
+                                                                             {
             try
             {
 
